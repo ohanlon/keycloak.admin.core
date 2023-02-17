@@ -1,15 +1,16 @@
 ﻿namespace Keycloak.Admin.Core.Support.Http;
 
-public abstract class Request
+public abstract class Request : IDisposable
 {
     /// <summary>
     /// Instantiate a new instance of the Request class.
     /// </summary>
     /// <param name="client">The HTTP client to create the connection.</param>
     /// <exception cref="ArgumentNullException">Thrown if the <paramref name="client"/> is not supplied.</exception>
-    protected Request(HttpClient client)
+    protected Request(IHttpClientFactory client)
     {
-        Client = client ?? throw new ArgumentNullException(nameof(client));
+        _ = client ?? throw new ArgumentNullException(nameof(client));
+        Client = client.CreateClient();
     }
 
     /// <summary>
@@ -31,11 +32,16 @@ public abstract class Request
     /// <summary>
     /// Optionally, any request headers that we wish to add to the HTTP request.
     /// </summary>
-    public RequestHeaders? RequestHeaders { get; set; }
+    public RequestHeaders? RequestHeaders { get; set; } = new();
 
     public FormData? FormData { get; set; }
 
     protected HttpClient Client { get; }
 
     protected abstract Task<HttpResponseMessage?> Execute(Endpoint endpoint);
+
+    public void Dispose()
+    {
+        Client?.Dispose();
+    }
 }

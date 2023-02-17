@@ -2,7 +2,7 @@
 
 public class PostRequest : Request
 {
-    public PostRequest(HttpClient httpClient) : base(httpClient)
+    public PostRequest(IHttpClientFactory httpClientFactory) : base(httpClientFactory)
     {
     }
 

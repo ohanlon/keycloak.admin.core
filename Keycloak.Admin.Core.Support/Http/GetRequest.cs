@@ -6,10 +6,10 @@
 public class GetRequest : Request
 {
     /// <summary>
-    /// Instantiate a new instance of the GetRequest class, passing in a <see cref="HttpClient"/> instance.
+    /// Instantiate a new instance of the GetRequest class, passing in a <see cref="IHttpClientFactory"/> instance.
     /// </summary>
-    /// <param name="client">The HttpClient instance to execute the Get request.</param>
-    public GetRequest(HttpClient client) : base(client)
+    /// <param name="client">The IHttpClientFactory instance to execute the Get request.</param>
+    public GetRequest(IHttpClientFactory client) : base(client)
     {
     }
 

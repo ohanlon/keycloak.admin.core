@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Keycloak.Admin.Core.Support.Http;
 
 namespace Keycloak.Admin.Core.Validations;
 
