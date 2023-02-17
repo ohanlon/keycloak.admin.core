@@ -7,6 +7,6 @@ public class EnsureValidUriFormat : ValidationAttribute
 {
     public override bool IsValid(object? value)
     {
-        return value != null && HttpFormatEndpoint.IsValid(value.ToString());
+        return value != null && HttpFormatEndpoint.IsValid(value.ToString() ?? string.Empty);
     }
 }

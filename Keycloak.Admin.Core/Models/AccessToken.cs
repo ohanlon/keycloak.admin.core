@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using Keycloak.Admin.Core.Exceptions;
 
 namespace Keycloak.Admin.Core.Models;
 
@@ -26,6 +27,8 @@ public static class BearerToken
 
     public static void AddTokenToRequestHeader(this Token? token, Request request)
     {
+        if (token is null) throw new MissingTokenException();
+        
         request.RequestHeaders ??= new();
         request.RequestHeaders.Add("Authorization", $"Bearer {token.AccessToken}");
     }

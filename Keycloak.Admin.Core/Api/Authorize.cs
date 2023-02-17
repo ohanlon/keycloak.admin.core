@@ -47,7 +47,7 @@ public class Authorize
                     authenticationOptions.ServiceAccount.ClientSecret);
             case {AuthenticationType: AuthenticationType.Password, Password: { }}:
                 return await GetAccessToken(options.KeycloakConnectionOptions.Endpoint(), options.RealmKey, realm!.Resource,
-                    authenticationOptions?.Password?.Username, authenticationOptions?.Password?.Password);
+                    authenticationOptions?.Password?.Username ?? string.Empty, authenticationOptions?.Password?.Password ?? string.Empty);
         }
 
         return BearerToken.Empty;
