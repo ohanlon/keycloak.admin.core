@@ -73,14 +73,40 @@ public class KeycloakConnectionOptionsTests
     [Fact]
     public void AuthorizationServerUrl_Should_Be_Valid_Uri_Format()
     {
-        var realm = new RealmOptions {Realm = "Test"};
-        var options = new KeycloakConnectionOptions { AuthorizationServerUrl = "https://www.example.com", Realms = new[]{ realm }};
-
+        var options = DefaultKeycloak();
         var context = new ValidationContext(options, null, null);
         var results = new List<ValidationResult>();
         var isValid = Validator.TryValidateObject(options, context, results, true);
 
         Assert.True(isValid);
+    }
+    
+    private KeycloakConnectionOptions DefaultKeycloak()
+    {
+        RealmOptions realm = new RealmOptions
+        {
+            Key = "test",
+            Realm = "test",
+            AuthenticationOptions = new[]
+            {
+                new AuthenticationOptions
+                {
+                    AuthenticationType = AuthenticationType.Password,
+                    Key = "test",
+                    Password = new PasswordOptions
+                    {
+                        Password = "test",
+                        Username = "test"
+                    }
+                }
+            }
+        };
+
+        return new KeycloakConnectionOptions
+        {
+            AuthorizationServerUrl = "http://www.example.com",
+            Realms = new[] {realm}
+        };
     }
     
     [Fact]

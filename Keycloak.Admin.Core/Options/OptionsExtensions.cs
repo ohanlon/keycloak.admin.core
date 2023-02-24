@@ -2,7 +2,7 @@
 
 internal static class OptionsExtensions
 {
-    public static RealmOptions? GetRealm(this RealmAccessConfiguration options) =>
+    public static RealmOptions? GetRealm(this CommonConfiguration options) =>
         options.KeycloakConnectionOptions.Realms.FirstOrDefault(realmOptions => realmOptions.Key == options.RealmKey);
 
     public static RealmOptions? GetRealm(this KeycloakConnectionOptions options, string realmKey) =>
@@ -16,7 +16,7 @@ internal static class OptionsExtensions
             ? options.AuthorizationServerUrl
             : $"{options.AuthorizationServerUrl}/";
 
-    public static string RealmEndpoint(this RealmAccessConfiguration options) =>
+    public static string RealmEndpoint(this CommonConfiguration options) =>
         $"{options.KeycloakConnectionOptions.Endpoint()}admin/realms/{options.KeycloakConnectionOptions.GetRealm(options.RealmKey)}/";
 
     public static string RealmEndpoint(this KeycloakConnectionOptions options, RealmOptions realm) =>

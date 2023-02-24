@@ -12,10 +12,11 @@ public class Authorize
     /// <summary>
     /// Instantiate a new instance of the Authorize class.
     /// </summary>
-    /// <param name="httpClientFactory">The HTTP client.</param>
-    public Authorize(IHttpClientFactory httpClientFactory)
+    /// <param name="httpClientFactory">The HTTP client factory.</param>
+    /// <exception cref="ArgumentNullException">Thrown if the client factory is null.</exception>
+    public Authorize(IHttpClientFactory? httpClientFactory)
     {
-        _httpClientFactory = httpClientFactory;
+        _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
     }
 
     /// <summary>
@@ -26,14 +27,16 @@ public class Authorize
     /// <param name="accessKey">The key identifying which access item should be picked from the realm.</param>
     public virtual async Task<Token?> GetAccessToken(KeycloakConnectionOptions options, string realmKey,
         string accessKey) =>
-        await GetAccessToken(new RealmAccessConfiguration(options, realmKey, accessKey));
+        await GetAccessToken(new CommonConfiguration(options, realmKey, accessKey));
 
     /// <summary>
     /// Get the access token using the <see cref="KeycloakConnectionOptions"/> for the relevant realm and access key.
     /// </summary>
-    /// <param name="options">The <see cref="RealmAccessConfiguration"/> containing the connection options.</param>
-    public virtual async Task<Token?> GetAccessToken(RealmAccessConfiguration options)
+    /// <param name="options">The <see cref="CommonConfiguration"/> containing the connection options.</param>
+    public virtual async Task<Token?> GetAccessToken(CommonConfiguration options)
     {
+        if (options is null) throw new ArgumentNullException(nameof(options));
+
         var realm = options.KeycloakConnectionOptions.GetRealm(options.RealmKey);
         if (realm is null) return BearerToken.Empty;
         var authenticationOptions =
@@ -43,17 +46,19 @@ public class Authorize
         switch (authenticationOptions)
         {
             case {AuthenticationType: AuthenticationType.ServiceAccount, ServiceAccount.ClientSecret: { }}:
-                return await GetAccessToken(options.KeycloakConnectionOptions.Endpoint(), options.RealmKey, realm!.Resource,
+                return await GetAccessToken(options.KeycloakConnectionOptions.Endpoint(), options.RealmKey,
+                    realm!.Resource,
                     authenticationOptions.ServiceAccount.ClientSecret);
-            case {AuthenticationType: AuthenticationType.Password, Password: { }}:
-                return await GetAccessToken(options.KeycloakConnectionOptions.Endpoint(), options.RealmKey, realm!.Resource,
-                    authenticationOptions?.Password?.Username ?? string.Empty, authenticationOptions?.Password?.Password ?? string.Empty);
+            default:
+                return await GetAccessToken(options.KeycloakConnectionOptions.Endpoint(), options.RealmKey,
+                    realm!.Resource,
+                    authenticationOptions?.Password?.Username ?? string.Empty,
+                    authenticationOptions?.Password?.Password ?? string.Empty);
         }
-
-        return BearerToken.Empty;
     }
 
-    private async Task<Token?> GetAccessToken(string endpoint, string realm, string audience, string userName, string password)
+    private async Task<Token?> GetAccessToken(string endpoint, string realm, string audience, string userName,
+        string password)
     {
         string url = $"{endpoint}realms/{realm}/protocol/openid-connect/token";
         using PostRequest postRequest = new PostRequest(_httpClientFactory)

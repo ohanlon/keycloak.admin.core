@@ -8,7 +8,7 @@
 /// <param name="KeycloakConnectionOptions"></param>
 /// <param name="RealmKey"></param>
 /// <param name="AccessKey"></param>
-public record RealmAccessConfiguration(KeycloakConnectionOptions KeycloakConnectionOptions, string RealmKey,
+public record CommonConfiguration(KeycloakConnectionOptions KeycloakConnectionOptions, string RealmKey,
     string AccessKey)
 {
     public readonly KeycloakConnectionOptions KeycloakConnectionOptions = KeycloakConnectionOptions;

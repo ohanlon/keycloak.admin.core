@@ -1,4 +1,5 @@
-﻿using Keycloak.Admin.Core.Options;
+﻿using Keycloak.Admin.Core.Exceptions;
+using Keycloak.Admin.Core.Options;
 
 namespace Keycloak.Admin.Core.Api;
 
@@ -37,7 +38,7 @@ public class AttackDetection
     public virtual async Task<bool> BruteForceDelete(KeycloakConnectionOptions options, string realmKey,
         string accessKey)
     {
-        return await BruteForceDelete(new RealmAccessConfiguration(options, realmKey, accessKey));
+        return await BruteForceDelete(new CommonConfiguration(options, realmKey, accessKey));
     }
     
     /// <summary>
@@ -46,12 +47,12 @@ public class AttackDetection
     /// <remarks>In order to use this capability, the user must belong to the manage-users role, which
     /// can be set in the realm-management section. If the user does not have this role, this method will
     /// return false</remarks>
-    /// <param name="options">The <see cref="RealmAccessConfiguration"/> containing the connection options.</param>
+    /// <param name="options">The <see cref="CommonConfiguration"/> containing the connection options.</param>
     /// <returns>True, if the brute force delete was successful, false otherwise.</returns>
-    public virtual async Task<bool> BruteForceDelete(RealmAccessConfiguration options)
+    public virtual async Task<bool> BruteForceDelete(CommonConfiguration options)
     {
         Token? accessToken = await _authorize.GetAccessToken(options);
-        if (accessToken == BearerToken.Empty) return false; // Will change to throw an access token exception.
+        if (accessToken == BearerToken.Empty) throw new MissingTokenException(); // Will change to throw an access token exception.
         using DeleteRequest deleteRequest = new DeleteRequest(_httpClientFactory);
         accessToken.AddTokenToRequestHeader(deleteRequest);
         string url = $"{options.RealmEndpoint()}attack-detection/brute-force/users";
@@ -75,7 +76,7 @@ public class AttackDetection
     public virtual async Task<bool> BruteForceDelete(KeycloakConnectionOptions options, string realmKey,
         string accessKey, string user)
     {
-        return await BruteForceDelete(new RealmAccessConfiguration(options, realmKey, accessKey), user);
+        return await BruteForceDelete(new CommonConfiguration(options, realmKey, accessKey), user);
     }
     
     /// <summary>
@@ -84,10 +85,10 @@ public class AttackDetection
     /// <remarks>In order to use this capability, the user must belong to the manage-users role, which
     /// can be set in the realm-management section. If the user does not have this role, this method will
     /// return false</remarks>
-    /// <param name="options">The <see cref="RealmAccessConfiguration"/> containing the connection options.</param>
+    /// <param name="options">The <see cref="CommonConfiguration"/> containing the connection options.</param>
     /// <param name="user">The user id that needs to be unlocked.</param>
     /// <returns>True, if the brute force delete was successful, false otherwise.</returns>
-    public virtual async Task<bool> BruteForceDelete(RealmAccessConfiguration options, string user)
+    public virtual async Task<bool> BruteForceDelete(CommonConfiguration options, string user)
     {
         Token? accessToken = await _authorize.GetAccessToken(options);
         if (accessToken == BearerToken.Empty) return false; // Will change to throw an access token exception.
