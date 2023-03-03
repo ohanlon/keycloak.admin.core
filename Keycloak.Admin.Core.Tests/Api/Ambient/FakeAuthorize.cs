@@ -6,12 +6,12 @@ namespace Keycloak.Admin.Core.Tests.Api.Ambient;
 
 public class FakeAuthorize : Authorize
 {
-    public Token AccessToken = FakeBearerToken.Token("Bearer test");
+    public Token? AccessToken = FakeBearerToken.Token("Bearer test");
     public FakeAuthorize() : base(new FakeHttpClientFactory())
     {
     }
 
-    public override Task<Token?> GetAccessToken(CommonConfiguration options)
+    public override Task<Token?> GetAccessToken(CommonConfiguration? options)
     {
         return Task.FromResult(AccessToken);
     }

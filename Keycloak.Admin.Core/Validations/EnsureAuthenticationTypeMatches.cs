@@ -13,7 +13,7 @@ public class EnsureAuthenticationTypeMatches : ValidationAttribute
     public override bool IsValid(object? value)
     {
         if (value == null) return false;
-        AuthenticationOptions? options = value as AuthenticationOptions;
+        var options = value as AuthenticationOptions;
         if (options is {AuthenticationType: AuthenticationType.Password})
         {
             return options.Password != null;

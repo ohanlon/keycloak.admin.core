@@ -83,7 +83,7 @@ public class KeycloakConnectionOptionsTests
     
     private KeycloakConnectionOptions DefaultKeycloak()
     {
-        RealmOptions realm = new RealmOptions
+        var realm = new RealmOptions
         {
             Key = "test",
             Realm = "test",

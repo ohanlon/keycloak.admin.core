@@ -8,6 +8,7 @@
 
 using Keycloak.Admin.Core;
 using Keycloak.Admin.Core.Api;
+using Keycloak.Admin.Core.Api.AttackDetection;
 using Keycloak.Admin.Core.Models;
 using Keycloak.Admin.Core.Options;
 using Microsoft.Extensions.Options;
@@ -27,11 +28,14 @@ var ko = builder.Configuration.GetKeycloakConnectionOptions("keycloak");
 
 app.MapGet("/token", async (Authorize authorize) =>
 {
-    Token? token = await authorize.GetAccessToken(ko, "CP", "Master");
+    var token = await authorize.GetAccessToken(ko, "CP", "Master");
     return Results.Ok(token);
 });
 
 app.MapGet("/bruteforce",
-    async (AttackDetection attackDetection) => await attackDetection.BruteForceDelete(ko, "CP", "Master"));
+    async (BruteForce attackDetection) => await attackDetection.ClearLoginFailuresForAllUsers(ko, "CP", "Master"));
 
+app.MapGet("/bruteforcestatus",
+    async (BruteForce attackDetection) =>
+        await attackDetection.LoginFailuresForUser(ko, "CP", "Master", "Peter"));
 app.Run();

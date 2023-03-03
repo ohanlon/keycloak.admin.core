@@ -11,7 +11,7 @@ public static class FakeBearerToken
     public static StringContent TokenContent() => 
         new(JsonSerializer.Serialize(Token()));
 
-    public static Token Token() => Token("Test");
-    public static Token Token(string accessToken) => 
+    public static Token? Token() => Token("Test");
+    public static Token? Token(string accessToken) => 
         new(accessToken, 0, 0, "0", "Bearer", 0, "", "openid");
 }

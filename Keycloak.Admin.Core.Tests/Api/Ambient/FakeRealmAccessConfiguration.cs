@@ -4,6 +4,6 @@ namespace Keycloak.Admin.Core.Tests.Api.Ambient;
 
 public static class FakeConfiguration
 {
-    public static CommonConfiguration Fake() => 
-        new(null, null, null);
+    public static CommonConfiguration? Fake() => 
+        new(new(), string.Empty, string.Empty);
 }

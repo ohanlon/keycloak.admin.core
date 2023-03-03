@@ -8,7 +8,7 @@ public class DeleteRequest : Request
 
     protected override async Task<HttpResponseMessage?> Execute(Endpoint endpoint)
     {
-        HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Delete, endpoint.Address);
+        var requestMessage = new HttpRequestMessage(HttpMethod.Delete, endpoint.Address);
         if (FormData != null)
         {
             requestMessage.Content = FormData!.Apply();

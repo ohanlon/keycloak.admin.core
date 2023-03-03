@@ -1,24 +1,24 @@
 ﻿using Keycloak.Admin.Core.Exceptions;
 using Keycloak.Admin.Core.Options;
 
-namespace Keycloak.Admin.Core.Api;
+namespace Keycloak.Admin.Core.Api.AttackDetection;
 
 /// <summary>
 /// When there has been a brute force attack on a Keycloak server, users can be locked out. This API
 /// provides the ability to manage the attack detection.
 /// </summary>
-public class AttackDetection
+public class BruteForce
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly Authorize _authorize;
-    
+
     /// <summary>
-    /// Instantiates a new instance of the AttackDetection class.
+    /// Instantiates a new instance of the BruteForce class.
     /// </summary>
     /// <param name="httpClientFactory">The HTTP Client factory</param>
     /// <param name="authorize">The <see cref="Authorize"/> instance used to generate the access token.</param>
     /// <exception cref="ArgumentNullException">Thrown if the parameters are null.</exception>
-    public AttackDetection(IHttpClientFactory httpClientFactory, Authorize authorize)
+    public BruteForce(IHttpClientFactory? httpClientFactory, Authorize? authorize)
     {
         _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
         _authorize = authorize ?? throw new ArgumentNullException(nameof(authorize));
@@ -35,12 +35,12 @@ public class AttackDetection
     /// <param name="realmKey">The key of the realm to pick up from the options.</param>
     /// <param name="accessKey">The key identifying which access item should be picked from the realm.</param>
     /// <returns>True, if the brute force delete was successful, false otherwise.</returns>
-    public virtual async Task<bool> BruteForceDelete(KeycloakConnectionOptions options, string realmKey,
+    public virtual async Task<bool> ClearLoginFailuresForAllUsers(KeycloakConnectionOptions options, string realmKey,
         string accessKey)
     {
-        return await BruteForceDelete(new CommonConfiguration(options, realmKey, accessKey));
+        return await ClearLoginFailuresForAllUsers(new CommonConfiguration(options, realmKey, accessKey));
     }
-    
+
     /// <summary>
     /// Clears the login failures for all users, releasing any temporarily disabled users.
     /// </summary>
@@ -49,13 +49,14 @@ public class AttackDetection
     /// return false</remarks>
     /// <param name="options">The <see cref="CommonConfiguration"/> containing the connection options.</param>
     /// <returns>True, if the brute force delete was successful, false otherwise.</returns>
-    public virtual async Task<bool> BruteForceDelete(CommonConfiguration options)
+    public virtual async Task<bool> ClearLoginFailuresForAllUsers(CommonConfiguration? options)
     {
-        Token? accessToken = await _authorize.GetAccessToken(options);
-        if (accessToken == BearerToken.Empty) throw new MissingTokenException(); // Will change to throw an access token exception.
-        using DeleteRequest deleteRequest = new DeleteRequest(_httpClientFactory);
+        var accessToken = await _authorize.GetAccessToken(options);
+        if (accessToken == BearerToken.Empty)
+            throw new MissingTokenException(); // Will change to throw an access token exception.
+        using var deleteRequest = new DeleteRequest(_httpClientFactory);
         accessToken.AddTokenToRequestHeader(deleteRequest);
-        string url = $"{options.RealmEndpoint()}attack-detection/brute-force/users";
+        var url = $"{options.RealmEndpoint()}attack-detection/brute-force/users";
         using var responseMessage = await deleteRequest.Execute(url);
         // Decode the response
         return responseMessage!.IsSuccessStatusCode;
@@ -73,12 +74,12 @@ public class AttackDetection
     /// <param name="accessKey">The key identifying which access item should be picked from the realm.</param>
     /// <param name="user">The user id that needs to be unlocked.</param>
     /// <returns>True, if the brute force delete was successful, false otherwise.</returns>
-    public virtual async Task<bool> BruteForceDelete(KeycloakConnectionOptions options, string realmKey,
+    public virtual async Task<bool> ClearLoginFailuresForAllUsers(KeycloakConnectionOptions options, string realmKey,
         string accessKey, string user)
     {
-        return await BruteForceDelete(new CommonConfiguration(options, realmKey, accessKey), user);
+        return await ClearLoginFailuresForAllUsers(new CommonConfiguration(options, realmKey, accessKey), user);
     }
-    
+
     /// <summary>
     /// Clears the login failures for a specific user, releasing a temporarily disabled user.
     /// </summary>
@@ -88,15 +89,30 @@ public class AttackDetection
     /// <param name="options">The <see cref="CommonConfiguration"/> containing the connection options.</param>
     /// <param name="user">The user id that needs to be unlocked.</param>
     /// <returns>True, if the brute force delete was successful, false otherwise.</returns>
-    public virtual async Task<bool> BruteForceDelete(CommonConfiguration options, string user)
+    public virtual async Task<bool> ClearLoginFailuresForAllUsers(CommonConfiguration? options, string user)
     {
-        Token? accessToken = await _authorize.GetAccessToken(options);
+        var accessToken = await _authorize.GetAccessToken(options);
         if (accessToken == BearerToken.Empty) return false; // Will change to throw an access token exception.
-        using DeleteRequest deleteRequest = new DeleteRequest(_httpClientFactory);
+        using var deleteRequest = new DeleteRequest(_httpClientFactory);
         accessToken.AddTokenToRequestHeader(deleteRequest);
-        string url = $"{options.RealmEndpoint()}attack-detection/brute-force/users/{user}";
+        var url = options.Endpoint($"attack-detection/brute-force/users/{user}");
         using var responseMessage = await deleteRequest.Execute(url);
-        // Decode the response
         return responseMessage!.IsSuccessStatusCode;
+    }
+
+    public virtual async Task<object> LoginFailuresForUser(KeycloakConnectionOptions options, string realmKey,
+        string accessKey, string user) =>
+        await LoginFailuresForUser(new CommonConfiguration(options, realmKey, accessKey), user);
+
+    public virtual async Task<object> LoginFailuresForUser(CommonConfiguration? options, string user)
+    {
+        var accessToken = await _authorize.GetAccessToken(options);
+        if (accessToken == BearerToken.Empty) return new(); // Will change to throw an access token exception.
+        using var getRequest = new GetRequest(_httpClientFactory);
+        accessToken.AddTokenToRequestHeader(getRequest);
+        var url = options.Endpoint($"attack-detection/brute-force/users/{user}");
+        using var responseMessage = await getRequest.Execute(url);
+        // Decode the response
+        return responseMessage!.Content;
     }
 }

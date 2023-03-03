@@ -1,5 +1,8 @@
-﻿namespace Keycloak.Admin.Core.Options;
+﻿using System.Diagnostics.CodeAnalysis;
 
+namespace Keycloak.Admin.Core.Options;
+
+[ExcludeFromCodeCoverage]
 internal static class OptionsExtensions
 {
     public static RealmOptions? GetRealm(this CommonConfiguration options) =>
@@ -16,11 +19,23 @@ internal static class OptionsExtensions
             ? options.AuthorizationServerUrl
             : $"{options.AuthorizationServerUrl}/";
 
-    public static string RealmEndpoint(this CommonConfiguration options) =>
-        $"{options.KeycloakConnectionOptions.Endpoint()}admin/realms/{options.KeycloakConnectionOptions.GetRealm(options.RealmKey)}/";
+    public static string RealmEndpoint(this CommonConfiguration? options)
+    {
+        _ = options ?? throw new ArgumentNullException(nameof(options));
+        var realm = options.KeycloakConnectionOptions.GetRealm(options.RealmKey);
+        return
+            $"{options.KeycloakConnectionOptions.Endpoint()}admin/realms/{realm.Realm}/";
+    }
 
     public static string RealmEndpoint(this KeycloakConnectionOptions options, RealmOptions realm) =>
         $"{options.Endpoint()}admin/realms/{realm.Realm}/";
+    
+    public static string Endpoint(this CommonConfiguration? options, string endpoint) => $"{RealmEndpoint(options)}{endpoint}";
+
+    public static string Endpoint(this KeycloakConnectionOptions? options, RealmOptions realm, string endpoint)
+    {
+        return $"{RealmEndpoint(options, realm)}{endpoint}";
+    }
 }
 
 internal static class AuthenticationValidation

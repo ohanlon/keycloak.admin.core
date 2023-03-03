@@ -33,7 +33,7 @@ public class Authorize
     /// Get the access token using the <see cref="KeycloakConnectionOptions"/> for the relevant realm and access key.
     /// </summary>
     /// <param name="options">The <see cref="CommonConfiguration"/> containing the connection options.</param>
-    public virtual async Task<Token?> GetAccessToken(CommonConfiguration options)
+    public virtual async Task<Token?> GetAccessToken(CommonConfiguration? options)
     {
         if (options is null) throw new ArgumentNullException(nameof(options));
 
@@ -60,8 +60,8 @@ public class Authorize
     private async Task<Token?> GetAccessToken(string endpoint, string realm, string audience, string userName,
         string password)
     {
-        string url = $"{endpoint}realms/{realm}/protocol/openid-connect/token";
-        using PostRequest postRequest = new PostRequest(_httpClientFactory)
+        var url = $"{endpoint}realms/{realm}/protocol/openid-connect/token";
+        using var postRequest = new PostRequest(_httpClientFactory)
         {
             FormData = new()
         };
@@ -69,7 +69,7 @@ public class Authorize
         postRequest.FormData.Add("username", userName);
         postRequest.FormData.Add("password", password);
         postRequest.FormData.Add("grant_type", "password");
-        using HttpResponseMessage? responseMessage = await postRequest.Execute(url);
+        using var responseMessage = await postRequest.Execute(url);
         return await responseMessage.Deserialize(BearerToken.Empty);
     }
 
@@ -80,15 +80,15 @@ public class Authorize
             endpoint += ("/");
         }
 
-        string url = $"{endpoint}realms/{realm}/protocol/openid-connect/token";
-        using PostRequest postRequest = new PostRequest(_httpClientFactory)
+        var url = $"{endpoint}realms/{realm}/protocol/openid-connect/token";
+        using var postRequest = new PostRequest(_httpClientFactory)
         {
             FormData = new()
         };
         postRequest.FormData.Add("client_id", audience);
         postRequest.FormData.Add("client_secret", clientSecret);
         postRequest.FormData.Add("grant_type", "client_credentials");
-        using HttpResponseMessage? responseMessage = await postRequest.Execute(url);
+        using var responseMessage = await postRequest.Execute(url);
         return await responseMessage.Deserialize(BearerToken.Empty);
     }
 }

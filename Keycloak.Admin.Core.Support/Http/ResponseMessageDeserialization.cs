@@ -11,7 +11,7 @@ public static class ResponseMessageDeserialization
             responseMessage.StatusCode != HttpStatusCode.NoContent)
         {
             // Deserialize the response.
-            T? instance = await JsonSerializer.DeserializeAsync<T>(await responseMessage.Content.ReadAsStreamAsync());
+            var instance = await JsonSerializer.DeserializeAsync<T>(await responseMessage.Content.ReadAsStreamAsync());
             responseMessage.Dispose();
             return instance;
         }
@@ -25,7 +25,7 @@ public static class ResponseMessageDeserialization
             responseMessage.StatusCode != HttpStatusCode.NoContent)
         {
             // Deserialize the response.
-            T? instance = await JsonSerializer.DeserializeAsync<T>(await responseMessage.Content.ReadAsStreamAsync());
+            var instance = await JsonSerializer.DeserializeAsync<T>(await responseMessage.Content.ReadAsStreamAsync());
             responseMessage.Dispose();
             return instance;
         }

@@ -17,7 +17,7 @@ public class AuthorizeTests
     [Fact]
     public void NullException_Is_Thrown_When_RealmAccessConfiguration_Is_Null()
     {
-        HttpResponseMessage responseMessage = new HttpResponseMessage();
+        var responseMessage = new HttpResponseMessage();
         var authorize = new Authorize(responseMessage.HttpClientFactory());
         Assert.ThrowsAsync<ArgumentNullException>(() => authorize.GetAccessToken(null));
     }
@@ -25,7 +25,7 @@ public class AuthorizeTests
     [Fact]
     public async Task When_Realm_Not_Found_Empty_BearerToken_Is_Returned()
     {
-        HttpResponseMessage responseMessage = new HttpResponseMessage();
+        var responseMessage = new HttpResponseMessage();
         var authorize = new Authorize(responseMessage.HttpClientFactory());
         Assert.Equal(BearerToken.Empty,
             await authorize.GetAccessToken(DefaultKeycloak(), "test1", "test"));
@@ -35,7 +35,7 @@ public class AuthorizeTests
     [Fact]
     public async Task When_AuthenticationOptions_Not_Found_Empty_BearerToken_Is_Returned()
     {
-        HttpResponseMessage responseMessage = new HttpResponseMessage();
+        var responseMessage = new HttpResponseMessage();
         var authorize = new Authorize(responseMessage.HttpClientFactory());
         Assert.Equal(BearerToken.Empty,
             await authorize.GetAccessToken(DefaultKeycloak(), "test", "test1"));
@@ -44,19 +44,19 @@ public class AuthorizeTests
     [Fact]
     public async Task When_AuthenticationOptions_Set_Then_AccessToken_Is_Returned()
     {
-        HttpResponseMessage responseMessage = new HttpResponseMessage()
+        var responseMessage = new HttpResponseMessage()
         {
             StatusCode = HttpStatusCode.OK,
             Content = FakeBearerToken.TokenContent()
         };
         var authorize = new Authorize(responseMessage.HttpClientFactory());
-        Token token = await authorize.GetAccessToken(DefaultKeycloak(), "test", "test");
-        Assert.Equal(token.AccessToken, "Test");
+        var token = await authorize.GetAccessToken(DefaultKeycloak(), "test", "test");
+        Assert.Equal("Test", token!.AccessToken);
     }
     
     private KeycloakConnectionOptions DefaultKeycloak()
     {
-        RealmOptions realm = new RealmOptions
+        var realm = new RealmOptions
         {
             Key = "test",
             Realm = "test",
